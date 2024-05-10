@@ -4,9 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-# Use absolute path here
-UPLOAD_FOLDER = "C:\\Users\\saeed\\PycharmProjects\\Local-Network-File-Manager\\uploads"
-
+UPLOAD_FOLDER = "uploads"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure the upload folder exists
