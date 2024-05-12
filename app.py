@@ -1,14 +1,37 @@
 import os
+import socket
 
+import pyqrcode
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
+PORT = 54321
 app = Flask(__name__)
-UPLOAD_FOLDER = "uploads"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure the upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception as e:
+        IP = '127.0.0.1'
+        print(e)
+    finally:
+        s.close()
+    return IP
+
+
+def display_qr_code():
+    ip_address = get_ip_address()
+    data = f'http://{ip_address}:{PORT}'
+    qr = pyqrcode.create(data)
+    print("Scan this QR code with your device to connect:")
+    print(qr.terminal(quiet_zone=1, background="black", module_color='white'))
 
 
 @app.route('/', methods=['GET'])
@@ -61,5 +84,7 @@ def ping():
     return "Pong"
 
 
+display_qr_code()
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0', port=PORT)
