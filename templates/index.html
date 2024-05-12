@@ -24,7 +24,7 @@
             width: 90%;
             max-width: 500px;
             background-color: #ddd;
-            margin: 20px 0;
+            margin: 20px;
         }
 
         #progressBar {
@@ -65,40 +65,38 @@
 </head>
 <body>
 <h1>File Upload</h1>
+<div id="serverPing">Server Ping: ...</div>
 <form action="/upload" enctype="multipart/form-data" id="uploadForm" method="post">
     <input multiple name="files" type="file">
     <input onclick="uploadFiles()" type="button" value="Upload">
+    <div id="barContainer">
+        <div id="progressBar"></div>
+    </div>
     <button disabled id="cancelButton" onclick="cancelUpload()" type="button">Cancel Upload</button>
 </form>
-<div id="barContainer">
-    <div id="progressBar">0%</div>
-</div>
-<div id="uploadSpeed">Upload Speed: 0 KB/s</div>
+
+<div id="totalUploadSize"></div>
+<div id="uploadSpeed"></div>
 <div id="uploadRemainingTime"></div>
-<div id="serverPing">Server Ping: ...</div>
 <h2>Uploaded Files</h2>
 <div class="file-list">
     {% for file in files %}
     <div id="{{ file }}">
-        <p>{{ file.name }} - {{ file.size_mb }} MB ({{ file.size_kb }} KB)</p>
-        {% if file.name.endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
-        <img alt="Thumbnail" src="{{ url_for('uploaded_file', filename=file.name) }}" style="width: auto; height: auto;">
+        <p>{{ file.name }}</p>
+        <p>{{ file.size_mb }} MB </p>
+        {% if file.name.endswith(('.png', '.jpg', '.jpeg', '.gif','.heic')) %}
+        <img alt="Thumbnail" src="{{ url_for('uploaded_file', filename=file.name) }}"
+             style="width: auto; height: auto;">
         {% elif file.name.endswith(('.mp4', '.mov', '.avi')) %}
-        <video controls width="160">
+        <video controls width="auto">
             <source src="{{ url_for('uploaded_file', filename=file.name) }}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
-        {% elif file.name.endswith(('.mp3', '.wav', '.ogg')) %}
-        <audio controls>
-            <source src="{{ url_for('uploaded_file', filename=file.name) }}" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-        <img alt="Audio File" src="/static/audio_icon.png" style="width: 100px; height: auto;">
         {% endif %}
-
         <div>
-            <a class="button" download="{{ file.name }}" href="{{ url_for('uploaded_file', filename=file.name) }}">Download</a>
             <button class="button" onclick="removeFile('{{ file.name }}')">Remove</button>
+            <a class="button" download="{{ file.name }}"
+               href="{{ url_for('uploaded_file', filename=file.name) }}">Download</a>
         </div>
     </div>
     {% endfor %}
@@ -109,6 +107,18 @@
     function uploadFiles() {
         var form = document.getElementById('uploadForm');
         var formData = new FormData(form);
+
+        var files = form['files'].files; // Access the file list
+        var totalSize = 0;
+        // Calculate total file size in bytes
+        for (let i = 0; i < files.length; i++) {
+            totalSize += files[i].size;
+        }
+        // Display the total upload size in MB
+        var totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+        document.getElementById('totalUploadSize').innerText = 'Total Upload Size: ' + totalSizeMB + ' MB';
+
+
         xhr.open('POST', '/upload', true);
 
         var startTime = new Date().getTime(); // Start time of the upload
@@ -118,7 +128,7 @@
                 var currentTime = new Date().getTime(); // Current time on each progress event
                 var durationInSeconds = (currentTime - startTime) / 1000; // Duration in seconds
                 var bytesPerSecond = e.loaded / durationInSeconds;
-                var kbPerSecond = (bytesPerSecond / 1024).toFixed(2); // Speed in KB/s
+                var mbPerSecond = (bytesPerSecond / (1024 * 1024)).toFixed(2); // Speed in MB/s
                 var remainingBytes = e.total - e.loaded;
                 var remainingTimeInSeconds = remainingBytes / bytesPerSecond;
 
@@ -126,7 +136,7 @@
                 document.getElementById('progressBar').style.width = percentComplete + '%';
                 document.getElementById('progressBar').innerText = Math.round(percentComplete) + '%';
 
-                document.getElementById('uploadSpeed').innerText = 'Upload Speed: ' + kbPerSecond + ' KB/s';
+                document.getElementById('uploadSpeed').innerText = 'Upload Speed: ' + mbPerSecond + ' MB/s';
                 document.getElementById('uploadRemainingTime').innerText = 'Time Remaining: ' + formatSeconds(remainingTimeInSeconds);
             }
         };
@@ -151,8 +161,9 @@
     function cancelUpload() {
         xhr.abort();  // Cancel the ongoing upload
         document.getElementById('progressBar').style.width = '0%';
-        document.getElementById('progressBar').innerText = 'Upload Canceled';
-        document.getElementById('cancelButton').disabled = true;
+        document.getElementById('progressBar').innerText = '';
+        document.getElementById('uploadSpeed').innerText = 'Upload Canceled';
+        document.getElementById('uploadRemainingTime').innerText = '';
     }
 
     function removeFile(filename) {
@@ -177,7 +188,13 @@
         const hrs = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = Math.floor(seconds % 60);
-        return `${hrs}h ${mins}m ${secs}s`;
+        if (hrs !== 0) {
+            return `${hrs}h ${mins}m ${secs}s`;
+        } else if (mins !== 0) {
+            return `${mins}m ${secs}s`;
+        } else {
+            return `${secs}s`;
+        }
     }
 
     function checkPing() {
