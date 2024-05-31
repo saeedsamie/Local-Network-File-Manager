@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - main  # Set this to your default branch
+      - develop  # Set this to your default branch
   release:
     types: [created]
 
