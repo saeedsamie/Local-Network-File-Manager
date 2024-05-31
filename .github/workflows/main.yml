@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: SA #windows-latest  # Ensure you use a Windows runner to build .exe files 
+    runs-on: windows-latest  # Ensure you use a Windows runner to build .exe files 
 
     steps:
     - name: Check out code
