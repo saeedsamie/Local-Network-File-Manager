@@ -33,6 +33,8 @@ def display_qr_code():
     qr = pyqrcode.create(data)
     print("Scan this QR code with your device to connect:")
     print(qr.terminal(quiet_zone=1, background="black", module_color='white'))
+    qr.png('qrcode.png', scale=10, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xcc])
+    qr.show()
 
 
 @app.route('/', methods=['GET'])
