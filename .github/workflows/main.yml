@@ -29,7 +29,7 @@ jobs:
 
     - name: Build the executable  # Customize this step based on your build system
       run: |
-        pyinstaller --noconfirm --onedir --console --add-data "Local-Network-File-Manager/templates;templates/"  "Local-Network-File-Manager/app.py"  # Example command for PyInstaller
+        pyinstaller --noconfirm --onedir --console --add-data "templates;templates/"  "app.py"  # Example command for PyInstaller
 
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
@@ -65,5 +65,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./exe-file/*.exe
-        asset_name: YourApplicationName.exe
+        asset_name: LocalNetworkFileManager.exe
         asset_content_type: application/octet-stream
