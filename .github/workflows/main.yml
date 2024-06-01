@@ -30,7 +30,10 @@ jobs:
       - name: Build the executable
         run: |
           pyinstaller --noconfirm --onedir --console --icon "LNFM.ico" --name "LNFM" --add-data "templates;templates/" "app.py"
-          zip -r LNFM.zip dist/LNFM
+
+      - name: Archive production artifacts
+        uses: montudor/action-zip@v1
+        run: zip -r LNFM.zip dist/LNFM
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v4
