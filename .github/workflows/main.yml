@@ -6,64 +6,64 @@ on:
       - 5-build-github-action
       - develop # Set this to your default branch
   release:
-    types: [created]
+    types: [ created ]
 
 jobs:
   build:
     runs-on: windows-latest  # Ensure you use a Windows runner to build .exe files 
 
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    - name: Set up Python  # Only necessary if you're building a Python project
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.10'  # Specify your Python version
+      - name: Set up Python  # Only necessary if you're building a Python project
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'  # Specify your Python version
 
-    - name: Install dependencies  # Only necessary for Python projects
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller  # Example: using PyInstaller to build the .exe
-        pip install -r requirements.txt
+      - name: Install dependencies  # Only necessary for Python projects
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller  # Example: using PyInstaller to build the .exe
+          pip install -r requirements.txt
 
-    - name: Build the executable  # Customize this step based on your build system
-      run: |
-        pyinstaller --noconfirm --onedir --console --add-data "templates;templates/"  "app.py"  # Example command for PyInstaller
+      - name: Build the executable  # Customize this step based on your build system
+        run: |
+          pyinstaller --noconfirm --onedir --console --icon "LNFM.ico" --name "LNFM" --add-data "templates;templates/"  "app.py"  
 
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: exe-file
-        path: dist/*.exe  # Adjust this path to where your .exe is located
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: exe-file
+          path: dist/LNFM/*.exe  # Adjust this path to where your .exe is located
 
   release:
     needs: build
     runs-on: windows-latest
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: exe-file
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: exe-file
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
 
-    - name: Upload Release Asset
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./exe-file/*.exe
-        asset_name: LocalNetworkFileManager.exe
-        asset_content_type: application/octet-stream
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./exe-file/*.exe
+          asset_name: YourApplicationName.exe
+          asset_content_type: application/octet-stream
