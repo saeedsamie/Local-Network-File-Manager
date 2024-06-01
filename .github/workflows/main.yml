@@ -3,7 +3,8 @@ name: Build and Release
 on:
   push:
     branches:
-      - develop  # Set this to your default branch
+      - 5-build-github-action
+      - develop # Set this to your default branch
   release:
     types: [created]
 
