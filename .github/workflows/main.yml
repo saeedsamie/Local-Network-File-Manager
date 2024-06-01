@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - develop  # Set this to your default branch
+      - test_git_action  # Set this to your default branch
   release:
     types: [created]
 
